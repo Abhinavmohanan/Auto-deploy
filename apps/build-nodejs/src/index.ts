@@ -1,22 +1,25 @@
-// packages/api/src/index.ts
-
 import cors from "cors";
 import express from "express";
+import { Request, Response } from "express";
+import { deployToAzure } from "./controllers/deploy";
+import { buildImage } from "./controllers/buildImage";
 
-import { Workspace } from "@repo/typescript-config";
-
+require("dotenv").config();
 const app = express();
 const port = 5000;
 
-app.use(cors({ origin: "http://localhost:3000" }));
+app.use(express.json());
+app.use(cors({ origin: "*" }));
 
-app.get("/workspaces", (_, response) => {
-  const workspaces: Workspace[] = [
-    { name: "api", version: "1.0.0" },
-    { name: "types", version: "1.0.0" },
-    { name: "web", version: "1.0.0" },
-  ];
-  response.json({ data: workspaces });
+app.post("/publish", async (req: Request, res: Response) => {
+  const { project_name, github_url } = req.body;
+
+  await buildImage(project_name, github_url);
+
+  const url = await deployToAzure(project_name);
+  res.json({
+    message: `Published! URL : ${url}`,
+  });
 });
 
 app.listen(port, () => console.log(`Listening on http://localhost:${port}`));

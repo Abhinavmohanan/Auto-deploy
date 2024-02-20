@@ -6,7 +6,7 @@ import express from "express";
 import { Workspace } from "@repo/typescript-config";
 
 const app = express();
-const port = 5000;
+const port = 4000;
 
 app.use(cors({ origin: "http://localhost:3000" }));
 
