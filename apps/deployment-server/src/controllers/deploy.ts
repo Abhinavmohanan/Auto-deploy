@@ -11,14 +11,15 @@ type EnvironmentVariables = {
 export const deployToAzure = async (
   project_name: string,
   image_url: string,
-  env: EnvironmentVariables,
-  web: boolean = false
+  env?: EnvironmentVariables,
+  web: boolean = false,
+  port?: number
 ) => {
   console.log("Deploying to Azure...");
 
   const containerGroup = await AzureClient.containerGroups.beginCreateOrUpdate(
     "auto-deploy-user-deployed-apps",
-    `${project_name}-user-containers`,
+    `${project_name}-uc`, //user container
     {
       location: "centralindia",
       containers: [
@@ -33,7 +34,7 @@ export const deployToAzure = async (
           },
           ports: [
             {
-              port: 80,
+              port: port || 80,
             },
           ],
           environmentVariables: env,
@@ -42,11 +43,11 @@ export const deployToAzure = async (
       ipAddress: {
         ports: [
           {
-            port: 80,
+            port: port || 80,
           },
         ],
         type: "Public",
-        dnsNameLabel: project_name,
+        dnsNameLabel: project_name + "-deployment",
       },
       osType: "Linux",
       restartPolicy: "OnFailure",
@@ -59,20 +60,21 @@ export const deployToAzure = async (
   //Get logs from container till terminated
   let container = await AzureClient.containerGroups.get(
     "auto-deploy-user-deployed-apps",
-    `${project_name}-user-containers`
+    `${project_name}-uc`
   );
   while (
-    container.containers[0]?.instanceView?.currentState?.state !== "Terminated"
+    container.containers[0]?.instanceView?.currentState?.state !==
+    (web ? "Terminated" : "Running")
   ) {
     container = await AzureClient.containerGroups.get(
       "auto-deploy-user-deployed-apps",
-      `${project_name}-user-containers`
+      `${project_name}-uc`
     );
     console.log(container.containers[0]?.instanceView?.currentState?.state);
     //logs
     const logs = await AzureClient.containers.listLogs(
       "auto-deploy-user-deployed-apps",
-      `${project_name}-user-containers`,
+      `${project_name}-uc`,
       project_name
     );
 
@@ -83,15 +85,16 @@ export const deployToAzure = async (
 
   //No ip if building web app
   if (web) {
+    await AzureClient.containerGroups.beginDeleteAndWait(
+      "auto-deploy-user-deployed-apps",
+      `${project_name}-uc`
+    );
+
     return;
   }
 
   const url = containerGroup.getResult()?.ipAddress?.fqdn;
 
-  await AzureClient.containerGroups.beginDeleteAndWait(
-    "auto-deploy-user-deployed-apps",
-    `${project_name}-user-containers`
-  );
   console.log(url);
   return url;
 };

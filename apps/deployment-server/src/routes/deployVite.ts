@@ -4,7 +4,8 @@ import { deployToAzure } from "../controllers/deploy";
 let router: Router = Router();
 
 router.post("/", async (req, res) => {
-  const { project_name, github_url } = req.body;
+  let { project_name, github_url, env } = req.body;
+  project_name = project_name.toLowerCase();
 
   await deployToAzure(
     `${project_name}-web-builder`,
@@ -22,6 +23,7 @@ router.post("/", async (req, res) => {
         name: "GITHUB_REPO_URL",
         value: github_url,
       },
+      ...env,
     ],
     true
   ); //Build and push to Azure Blob Storage
