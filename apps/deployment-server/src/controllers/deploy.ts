@@ -1,4 +1,6 @@
 import { AzureClient } from "azure-setup";
+import { getNewLines, printLines } from "../utils/logger";
+import { get } from "axios";
 
 type EnvironmentVariables = {
   name: string;
@@ -44,28 +46,52 @@ export const deployToAzure = async (
           },
         ],
         type: "Public",
-        dnsNameLabel: "zenith-backend",
+        dnsNameLabel: project_name,
       },
       osType: "Linux",
       restartPolicy: "OnFailure",
     }
   );
-  await containerGroup.pollUntilDone();
+  console.log("Container Group created");
 
-  while (!containerGroup.isStopped()) {
-    console.log(
-      await AzureClient.containers.listLogs(
-        "auto-deploy-user-deployed-apps",
-        `${project_name}-user-containers`,
-        `${project_name}`
-      )
+  await containerGroup.pollUntilDone();
+  let oldString = "";
+  //Get logs from container till terminated
+  let container = await AzureClient.containerGroups.get(
+    "auto-deploy-user-deployed-apps",
+    `${project_name}-user-containers`
+  );
+  while (
+    container.containers[0]?.instanceView?.currentState?.state !== "Terminated"
+  ) {
+    container = await AzureClient.containerGroups.get(
+      "auto-deploy-user-deployed-apps",
+      `${project_name}-user-containers`
     );
+    console.log(container.containers[0]?.instanceView?.currentState?.state);
+    //logs
+    const logs = await AzureClient.containers.listLogs(
+      "auto-deploy-user-deployed-apps",
+      `${project_name}-user-containers`,
+      project_name
+    );
+
+    printLines(getNewLines(oldString, logs.content ?? ""));
+    oldString = logs.content ?? "";
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   }
 
+  //No ip if building web app
   if (web) {
     return;
   }
 
-  console.log(containerGroup.getResult()?.ipAddress?.fqdn);
-  return containerGroup.getResult()?.ipAddress?.fqdn;
+  const url = containerGroup.getResult()?.ipAddress?.fqdn;
+
+  await AzureClient.containerGroups.beginDeleteAndWait(
+    "auto-deploy-user-deployed-apps",
+    `${project_name}-user-containers`
+  );
+  console.log(url);
+  return url;
 };
