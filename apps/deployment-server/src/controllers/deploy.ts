@@ -18,90 +18,96 @@ export const deployToAzure = async (
 ) => {
   console.log("Deploying to Azure...");
   publishLogs(project_name, ["Deploying to Azure..."]);
-
-  const containerGroup = await AzureClient.containerGroups.beginCreateOrUpdate(
-    "auto-deploy-user-deployed-apps",
-    `${project_name}-uc`, //user container
-    {
-      location: "centralindia",
-      containers: [
+  try {
+    const containerGroup =
+      await AzureClient.containerGroups.beginCreateOrUpdate(
+        "auto-deploy-user-deployed-apps",
+        `${project_name}-uc`, //user container
         {
-          name: project_name,
-          image: image_url,
-          resources: {
-            requests: {
-              cpu: 1,
-              memoryInGB: 1,
-            },
-          },
-          ports: [
+          location: "centralindia",
+          containers: [
             {
-              port: port || 80,
+              name: project_name,
+              image: image_url,
+              resources: {
+                requests: {
+                  cpu: 1,
+                  memoryInGB: 1,
+                },
+              },
+              ports: [
+                {
+                  port: port || 80,
+                },
+              ],
+              environmentVariables: env,
             },
           ],
-          environmentVariables: env,
-        },
-      ],
-      ipAddress: {
-        ports: [
-          {
-            port: port || 80,
+          ipAddress: {
+            ports: [
+              {
+                port: port || 80,
+              },
+            ],
+            type: "Public",
+            dnsNameLabel: project_name + "-deployment",
           },
-        ],
-        type: "Public",
-        dnsNameLabel: project_name + "-deployment",
-      },
-      osType: "Linux",
-      restartPolicy: "OnFailure",
+          osType: "Linux",
+          restartPolicy: "OnFailure",
+        }
+      );
+
+    console.log("Container Group created");
+
+    await containerGroup.pollUntilDone();
+    let oldString = "";
+    //Get logs from container till terminated
+    let container = await AzureClient.containerGroups.get(
+      "auto-deploy-user-deployed-apps",
+      `${project_name}-uc`
+    );
+    let newline: string[] = [];
+    while (
+      container.containers[0]?.instanceView?.currentState?.state !==
+      (web ? "Terminated" : "Running")
+    ) {
+      container = await AzureClient.containerGroups.get(
+        "auto-deploy-user-deployed-apps",
+        `${project_name}-uc`
+      );
+      console.log(container.containers[0]?.instanceView?.currentState?.state);
+      //logs
+      const logs = await AzureClient.containers.listLogs(
+        "auto-deploy-user-deployed-apps",
+        `${project_name}-uc`,
+        project_name
+      );
+      newline = getNewLines(oldString, logs.content ?? "");
+      await publishLogs(project_name, newline);
+      printLines(newline);
+      oldString = logs.content ?? "";
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     }
-  );
-  console.log("Container Group created");
 
-  await containerGroup.pollUntilDone();
-  let oldString = "";
-  //Get logs from container till terminated
-  let container = await AzureClient.containerGroups.get(
-    "auto-deploy-user-deployed-apps",
-    `${project_name}-uc`
-  );
-  let newline: string[] = [];
-  while (
-    container.containers[0]?.instanceView?.currentState?.state !==
-    (web ? "Terminated" : "Running")
-  ) {
-    container = await AzureClient.containerGroups.get(
-      "auto-deploy-user-deployed-apps",
-      `${project_name}-uc`
-    );
-    console.log(container.containers[0]?.instanceView?.currentState?.state);
-    //logs
-    const logs = await AzureClient.containers.listLogs(
-      "auto-deploy-user-deployed-apps",
-      `${project_name}-uc`,
-      project_name
-    );
-    newline = getNewLines(oldString, logs.content ?? "");
-    await publishLogs(project_name, newline);
-    printLines(newline);
-    oldString = logs.content ?? "";
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    //No ip if building web app
+    if (web) {
+      await AzureClient.containerGroups.beginDeleteAndWait(
+        "auto-deploy-user-deployed-apps",
+        `${project_name}-uc`
+      );
+
+      return;
+    }
+
+    const url = containerGroup.getResult()?.ipAddress?.fqdn;
+
+    console.log(url);
+    publishLogs(project_name, [
+      `Deployed to ${url}${port && port != 80 ? `:${port}` : ""}`,
+    ]);
+    return url;
+  } catch (e: any) {
+    console.log(e);
+    publishLogs(project_name, ["Failed to deploy to Azure", e.message]);
   }
-
-  //No ip if building web app
-  if (web) {
-    await AzureClient.containerGroups.beginDeleteAndWait(
-      "auto-deploy-user-deployed-apps",
-      `${project_name}-uc`
-    );
-
-    return;
-  }
-
-  const url = containerGroup.getResult()?.ipAddress?.fqdn;
-
-  console.log(url);
-  publishLogs(project_name, [
-    `Deployed to ${url}${port && port != 80 ? `:${port}` : ""}`,
-  ]);
-  return url;
 };
