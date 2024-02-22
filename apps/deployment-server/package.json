@@ -24,8 +24,6 @@
     "@azure/logger": "^1.0.4",
     "axios": "^1.6.7",
     "azure-setup": "workspace:^",
-    "build-web": "workspace:^",
-    "buildweb": "^1.0.7",
     "cors": "^2.8.5",
     "express": "^4.18.2"
   }
