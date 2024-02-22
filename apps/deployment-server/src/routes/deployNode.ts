@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { buildImage } from "../controllers/buildImage";
 import { deployToAzure } from "../controllers/deploy";
+import { publishLogs } from "../utils/redis";
 
 let router: Router = Router();
 
@@ -10,8 +11,8 @@ router.post("/", async (req, res) => {
   if (port) {
     port = parseInt(port);
   }
+  await buildImage(project_name, github_url); //Builds docker image for the app
 
-  // await buildImage(project_name, github_url); //Builds docker image for the app
   const url = await deployToAzure(
     project_name,
     `autodeploy2024/${project_name}:latest`,
@@ -19,7 +20,6 @@ router.post("/", async (req, res) => {
     false,
     port
   );
-  console.log("Deployed to", url);
   //Deploys the app to Azure Container Instance
   res.json({
     url: `${url}${port && port != 80 ? `:${port}` : ""}`,

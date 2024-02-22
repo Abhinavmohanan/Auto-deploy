@@ -1,6 +1,7 @@
 import { AzureClient } from "azure-setup";
 import { getNewLines, printLines } from "../utils/logger";
 import { get } from "axios";
+import { publishLogs } from "../utils/redis";
 
 type EnvironmentVariables = {
   name: string;
@@ -16,6 +17,7 @@ export const deployToAzure = async (
   port?: number
 ) => {
   console.log("Deploying to Azure...");
+  publishLogs(project_name, ["Deploying to Azure..."]);
 
   const containerGroup = await AzureClient.containerGroups.beginCreateOrUpdate(
     "auto-deploy-user-deployed-apps",
@@ -62,6 +64,7 @@ export const deployToAzure = async (
     "auto-deploy-user-deployed-apps",
     `${project_name}-uc`
   );
+  let newline: string[] = [];
   while (
     container.containers[0]?.instanceView?.currentState?.state !==
     (web ? "Terminated" : "Running")
@@ -77,8 +80,9 @@ export const deployToAzure = async (
       `${project_name}-uc`,
       project_name
     );
-
-    printLines(getNewLines(oldString, logs.content ?? ""));
+    newline = getNewLines(oldString, logs.content ?? "");
+    await publishLogs(project_name, newline);
+    printLines(newline);
     oldString = logs.content ?? "";
     await new Promise((resolve) => setTimeout(resolve, 5000));
   }
@@ -96,5 +100,8 @@ export const deployToAzure = async (
   const url = containerGroup.getResult()?.ipAddress?.fqdn;
 
   console.log(url);
+  publishLogs(project_name, [
+    `Deployed to ${url}${port && port != 80 ? `:${port}` : ""}`,
+  ]);
   return url;
 };

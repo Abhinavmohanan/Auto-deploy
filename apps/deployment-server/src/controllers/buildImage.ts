@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getNewLines, printLines } from "../utils/logger";
+import { publishLogs } from "../utils/redis";
 require("dotenv").config();
 
 const JENKINS_URL = process.env.JENKINS_URL || "";
@@ -8,6 +9,7 @@ const JENKINS_PASSWORD = process.env.JENKINS_PASSWORD || "";
 
 export const buildImage = async (project_name: string, github_url: string) => {
   const formdata = new FormData();
+  await publishLogs(project_name, ["Building Image"]);
   formdata.append("project_name", project_name);
   formdata.append("github_url", github_url);
   try {
@@ -59,6 +61,7 @@ export const buildImage = async (project_name: string, github_url: string) => {
   }
   var inProgress = true;
   let oldString = "";
+  let newline: string[] = [];
   while (inProgress == true) {
     const response = await axios.post(
       JENKINS_URL + `/${buildId}/api/json`,
@@ -81,7 +84,9 @@ export const buildImage = async (project_name: string, github_url: string) => {
         },
       }
     );
-    printLines(getNewLines(oldString, logs.data));
+    newline = getNewLines(oldString, logs.data);
+    await publishLogs(project_name, newline);
+    printLines(newline);
     oldString = logs.data;
     //Delay
     await new Promise((resolve) => setTimeout(resolve, 5000));
