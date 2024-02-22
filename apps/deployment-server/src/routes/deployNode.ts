@@ -11,7 +11,7 @@ router.post("/", async (req, res) => {
     port = parseInt(port);
   }
 
-  await buildImage(project_name, github_url); //Builds docker image for the app
+  // await buildImage(project_name, github_url); //Builds docker image for the app
   const url = await deployToAzure(
     project_name,
     `autodeploy2024/${project_name}:latest`,
@@ -19,9 +19,10 @@ router.post("/", async (req, res) => {
     false,
     port
   );
+  console.log("Deployed to", url);
   //Deploys the app to Azure Container Instance
   res.json({
-    message: `Published! URL : ${url}${port ? `:${port}` : ""}`,
+    url: `${url}${port && port != 80 ? `:${port}` : ""}`,
   });
 });
 
