@@ -13,7 +13,7 @@ const io = new Server({
 io.on("connection", (socket) => {
   socket.on("subscribe", (channel) => {
     socket.join(`logs:${channel}`);
-    socket.emit("log", `Subscribed to ${channel}`);
+    socket.emit("log", `Starting deployment of ${channel}`);
   });
 });
 

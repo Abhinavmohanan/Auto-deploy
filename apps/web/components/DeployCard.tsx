@@ -9,7 +9,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
+import { Socket } from "socket.io-client";
+import { ClientToServerEvents, ServerToClientEvents } from "@repo/typescript-config"
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -20,7 +21,9 @@ type env = {
     value: string
 }
 
-const DeployCard = () => {
+const backendUrl = process.env.NEXT_PUBLIC_DEPLOY_SERVER
+
+const DeployCard = (props: { socket: Socket<ServerToClientEvents, ClientToServerEvents> }) => {
     const [framework, setFramework] = React.useState("Node.js")
     const [envCount, setEnvCount] = React.useState(1)
     const [env, setEnv] = React.useState(false)
@@ -53,8 +56,14 @@ const DeployCard = () => {
             alert("Please enter the github url and project name before deploying");
             return;
         }
+        if (props.socket.disconnected) {
+            props.socket.connect()
+        }
+        console.log("Subscribing to logs");
+        props.socket.emit('subscribe', projectName);
+
         if (framework == "Node.js") {
-            const response = await axios.post("http://localhost:5000/publishNode", {
+            const response = await axios.post(`${backendUrl}/publishNode`, {
                 port: port,
                 project_name: projectName,
                 github_url: github,
@@ -67,7 +76,7 @@ const DeployCard = () => {
                 });
             console.log(response.data);
         } else {
-            const response = await axios.post("http://localhost:5000/publishVite", {
+            const response = await axios.post(`${backendUrl}/publishVite`, {
                 project_name: projectName,
                 github_url: github,
                 env: envFields
