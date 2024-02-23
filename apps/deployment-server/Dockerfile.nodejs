@@ -1,0 +1,15 @@
+#Dockerfile to build nodejs image using jenkins
+
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+ARG SRC_DIR
+
+COPY ${SRC_DIR} /app
+
+CMD ["node","index.js"]

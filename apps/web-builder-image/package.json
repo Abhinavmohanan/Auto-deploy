@@ -1,0 +1,17 @@
+{
+  "name": "web-builder-image",
+  "version": "1.0.0",
+  "description": "",
+  "main": "script.js",
+  "scripts": {
+    "dev": "nodemon script.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@azure/storage-blob": "^12.17.0",
+    "dotenv": "^16.4.5",
+    "mime-types": "^2.1.35"
+  }
+}
