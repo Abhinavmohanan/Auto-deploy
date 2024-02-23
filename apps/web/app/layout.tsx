@@ -1,15 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Inter as FontSans } from "next/font/google"
-
-import { cn } from "../lib/utils"
 import { Navbar } from "@/components/Navbar";
 import Providers from "@/lib/redux/Provider";
-
-export const fontSans = FontSans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-})
 
 export const metadata: Metadata = {
   title: "Auto Deploy",
@@ -23,10 +15,7 @@ export default function RootLayout({
 }): JSX.Element {
   return (
     <html lang="en">
-      <body className={cn(
-        "min-h-screen bg-background font-sans antialiased",
-        fontSans.variable
-      )}>
+      <body className="min-h-screen bg-background font-sans antialiased">
         <Providers>
           <Navbar />
           {children}
