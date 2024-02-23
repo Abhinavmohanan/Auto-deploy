@@ -4,7 +4,7 @@ import httpProxy from "http-proxy";
 require("dotenv").config();
 const app = express();
 
-const port = 5002;
+const port = process.env.PORT || 3000;
 var proxy = httpProxy.createProxyServer();
 
 app.use((req, res) => {

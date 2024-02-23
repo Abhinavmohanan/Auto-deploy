@@ -14,4 +14,6 @@ app.use("/publishNode", deployNodeRoute);
 
 app.use("/publishVite", deployViteRoute);
 
-app.listen(port, () => console.log(`Listening on http://localhost:${port}`));
+app.listen(port, () =>
+  console.log(`Deployment server running on http://localhost:${port}`)
+);

@@ -1,21 +1,25 @@
-import { Socket } from "socket.io-client";
-import { ClientToServerEvents, ServerToClientEvents } from "@repo/typescript-config"
-import { useEffect, useState } from "react";
+"use client"
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { selectSocket, socketListen, socketStopListening } from "@/lib/redux/socketSlice";
+import { addLog, logSelector } from "@/lib/redux/logSlice";
 
-const Logs = (props: { socket: Socket<ServerToClientEvents, ClientToServerEvents> }) => {
-    const [logs, setLogs] = useState<string[]>([]);
+const Logs = () => {
+    const socket = useSelector(selectSocket);
+    const dispatch = useDispatch();
+    const logs = useSelector(logSelector);
 
     useEffect(() => {
-        if (props.socket.disconnected) {
-            props.socket.connect()
+        if (socket.disconnected) {
+            socket.connect()
         }
         //Check if socket already registered to event
-        props.socket.off('log');
-        props.socket.on('log', (log: string) => {
-            setLogs((prevLogs) => {
-                return [...prevLogs, log]
-            })
-        })
+        dispatch(socketStopListening({ event: 'log' }));
+        dispatch(socketListen({
+            event: 'log', callback: (log: string) => {
+                dispatch(addLog(log));
+            }
+        }));
     }, []);
 
     return (

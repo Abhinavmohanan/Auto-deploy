@@ -4,6 +4,7 @@ import { Inter as FontSans } from "next/font/google"
 
 import { cn } from "../lib/utils"
 import { Navbar } from "@/components/Navbar";
+import Providers from "@/lib/redux/Provider";
 
 export const fontSans = FontSans({
   subsets: ["latin"],
@@ -26,8 +27,10 @@ export default function RootLayout({
         "min-h-screen bg-background font-sans antialiased",
         fontSans.variable
       )}>
-        <Navbar />
-        {children}
+        <Providers>
+          <Navbar />
+          {children}
+        </Providers>
       </body>
     </html>
   );

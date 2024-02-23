@@ -1,3 +1,4 @@
+"use client"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import React, { useEffect } from "react";
@@ -9,12 +10,13 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Socket } from "socket.io-client";
-import { ClientToServerEvents, ServerToClientEvents } from "@repo/typescript-config"
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import axios from "axios"
+import { useDispatch, useSelector, } from "react-redux";
+import { selectSocket, socketConnect, socketEmit } from "@/lib/redux/socketSlice";
+import { clearLogs } from "@/lib/redux/logSlice";
 
 type env = {
     name: string,
@@ -23,7 +25,7 @@ type env = {
 
 const backendUrl = process.env.NEXT_PUBLIC_DEPLOY_SERVER
 
-const DeployCard = (props: { socket: Socket<ServerToClientEvents, ClientToServerEvents> }) => {
+const DeployCard = () => {
     const [framework, setFramework] = React.useState("Node.js")
     const [envCount, setEnvCount] = React.useState(1)
     const [env, setEnv] = React.useState(false)
@@ -32,6 +34,10 @@ const DeployCard = (props: { socket: Socket<ServerToClientEvents, ClientToServer
     const [projectName, setProjectName] = React.useState("")
     const [port, setPort] = React.useState("")
     const [projectNameError, setProjectNameError] = React.useState<string>("");
+    const [dir, setDir] = React.useState<string>("")
+
+    const dispatch = useDispatch();
+    const socket = useSelector(selectSocket);
 
 
     useEffect(() => {
@@ -56,18 +62,20 @@ const DeployCard = (props: { socket: Socket<ServerToClientEvents, ClientToServer
             alert("Please enter the github url and project name before deploying");
             return;
         }
-        if (props.socket.disconnected) {
-            props.socket.connect()
+        if (socket.disconnected) {
+            dispatch(socketConnect());
         }
+        dispatch(clearLogs())
         console.log("Subscribing to logs");
-        props.socket.emit('subscribe', projectName);
+        dispatch(socketEmit({ event: "subscribe", data: projectName }));
 
         if (framework == "Node.js") {
             const response = await axios.post(`${backendUrl}/publishNode`, {
                 port: port,
                 project_name: projectName,
                 github_url: github,
-                env: envFields
+                env: envFields,
+                src_dir: dir
             },
                 {
                     headers: {
@@ -141,7 +149,7 @@ const DeployCard = (props: { socket: Socket<ServerToClientEvents, ClientToServer
                 </CardContent>
                 {projectNameError && <div className="text-red-500 self-end pr-5">{projectNameError}</div>}
             </CardDescription>
-            {framework === "Node.js" ? <CardDescription>
+            {framework === "Node.js" ? <> <CardDescription>
                 <CardContent className="items-center flex flex-row justify-between text-base font-medium font-sans space-y-3">
                     <div>Port</div>
                     <Input onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,7 +157,18 @@ const DeployCard = (props: { socket: Socket<ServerToClientEvents, ClientToServer
                         setPort(e.target.value)
                     }} type="number" className="w-1/3"></Input>
                 </CardContent>
-            </CardDescription> : <></>}
+            </CardDescription>
+                <CardDescription>
+                    <CardContent className="items-center flex flex-row justify-between text-base font-medium font-sans space-y-3">
+                        <div>Source directory</div>
+                        <Input onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            e.preventDefault();
+                            setDir(e.target.value)
+                        }} type="text" className="w-1/3"></Input>
+                    </CardContent>
+                </CardDescription>
+            </>
+                : <></>}
             <CardDescription>
                 <CardContent className="items-center flex flex-row justify-between text-base font-medium font-sans space-y-3">
                     <div>Environment variables</div>
