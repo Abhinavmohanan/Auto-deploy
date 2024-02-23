@@ -9,7 +9,7 @@ RUN apk add --no-cache libc6-compat
 RUN apk update
 # Set working directory
 WORKDIR /app
-RUN yarn global add turbo
+RUN npm -g add turbo
 COPY . .
 RUN turbo prune web --docker
 
@@ -27,6 +27,4 @@ RUN pnpm install --filter web
 # Build the project
 RUN pnpm run build --filter web
 
-RUN cd apps/web
-
-CMD npm run start
+CMD pnpm -C ./apps/web run start

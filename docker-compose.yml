@@ -8,11 +8,13 @@ services:
       dockerfile: ./apps/web/Dockerfile
     restart: always
     ports:
-      - 3000
+      - 3000:3000
     depends_on:
       - deployment_server
       - log_server
       - reverse_proxy
+    env_file:
+      - ./apps/web/.env
 
   deployment_server:
     container_name: deployment_server
@@ -21,9 +23,11 @@ services:
       dockerfile: ./apps/deployment-server/Dockerfile
     restart: always
     ports:
-      - 3002
+      - 3002:3002
     depends_on:
       - reverse_proxy
+    env_file:
+      - ./apps/deployment-server/.env
 
   log_server:
     container_name: log_server
@@ -32,9 +36,11 @@ services:
       dockerfile: ./apps/log-server/Dockerfile
     restart: always
     ports:
-      - 3003
+      - 3003:3003
     depends_on:
       - reverse_proxy
+    env_file:
+      - ./apps/log-server/.env
 
   reverse_proxy:
     container_name: reverse_proxy
@@ -43,4 +49,6 @@ services:
       dockerfile: ./apps/reverse-proxy/Dockerfile
     restart: always
     ports:
-      - 3001
+      - 3001:3001
+    env_file:
+      - ./apps/reverse-proxy/.env
