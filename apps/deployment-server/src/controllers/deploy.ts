@@ -96,6 +96,9 @@ export const deployToAzure = async (
         "auto-deploy-user-deployed-apps",
         `${project_name}-uc`
       );
+      publishLogs(project_name, [
+        `Deployed to ${project_name}-web.auto-deploy.tech`,
+      ]);
 
       return;
     }
@@ -104,7 +107,7 @@ export const deployToAzure = async (
 
     console.log(url);
     publishLogs(project_name, [
-      `Deployed to ${url}${port && port != 80 ? `:${port}` : ""}`,
+      `Deployed to ${project_name}-server.auto-deploy.tech`,
     ]);
     return url;
   } catch (e: any) {
