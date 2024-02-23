@@ -56,7 +56,7 @@ const init = async () => {
 
 
         // Create a container
-        const containerName = `${projectId}`;
+        const containerName = `${projectId}-web`;
         const containerClient = blobServiceClient.getContainerClient(containerName);
         try {
             await containerClient.create({

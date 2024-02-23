@@ -19,10 +19,6 @@ export const deployToAzure = async (
 ) => {
   console.log("Deploying to Azure...");
   publishLogs(project_name, ["Deploying to Azure..."]);
-
-  if (!web) {
-    env?.push({ name: "SRC_DIR", value: build_path });
-  }
   try {
     const containerGroup =
       await AzureClient.containerGroups.beginCreateOrUpdate(
@@ -55,7 +51,7 @@ export const deployToAzure = async (
               },
             ],
             type: "Public",
-            dnsNameLabel: project_name + "-deployment",
+            dnsNameLabel: project_name + "-server",
           },
           osType: "Linux",
           restartPolicy: "OnFailure",
