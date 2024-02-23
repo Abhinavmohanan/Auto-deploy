@@ -1,3 +1,6 @@
 packages:
-  - "apps/*"
+  - "apps/deployment-server"
+  - "apps/log-server"
+  - "apps/reverse-proxy"
+  - "apps/web"
   - "packages/*"
