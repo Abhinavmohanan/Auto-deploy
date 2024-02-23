@@ -5,14 +5,14 @@ import { deployToAzure } from "../controllers/deploy";
 let router: Router = Router();
 
 router.post("/", async (req, res) => {
-  let { project_name, github_url, env, port } = req.body;
+  let { project_name, github_url, env, port, src_dir } = req.body;
   //Build directory
   // let build_dir = req.body.build_dir;
   project_name = project_name.toLowerCase();
   if (port) {
     port = parseInt(port);
   }
-  const result = await buildImage(project_name, github_url); //Builds docker image for the app
+  const result = await buildImage(project_name, github_url, src_dir); //Builds docker image for the app
   // if (result == "FAILED") {
   //   res.status(500).json({ message: "Failed to build image" });
   //   return;

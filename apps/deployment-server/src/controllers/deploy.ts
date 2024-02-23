@@ -14,10 +14,15 @@ export const deployToAzure = async (
   image_url: string,
   env?: EnvironmentVariables,
   web: boolean = false,
-  port?: number
+  port?: number,
+  build_path?: string
 ) => {
   console.log("Deploying to Azure...");
   publishLogs(project_name, ["Deploying to Azure..."]);
+
+  if (!web) {
+    env?.push({ name: "SRC_DIR", value: build_path });
+  }
   try {
     const containerGroup =
       await AzureClient.containerGroups.beginCreateOrUpdate(

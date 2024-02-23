@@ -7,11 +7,19 @@ const JENKINS_URL = process.env.JENKINS_URL || "";
 const JENKINS_USERNAME = process.env.JENKINS_USERNAME || "";
 const JENKINS_PASSWORD = process.env.JENKINS_PASSWORD || "";
 
-export const buildImage = async (project_name: string, github_url: string) => {
+export const buildImage = async (
+  project_name: string,
+  github_url: string,
+  src_dir: string = "./"
+) => {
   const formdata = new FormData();
   await publishLogs(project_name, ["Building Image"]);
   formdata.append("project_name", project_name);
   formdata.append("github_url", github_url);
+
+  if (src_dir) {
+    formdata.append("src_dir", src_dir);
+  }
   try {
     const response = await axios.post(
       JENKINS_URL + "/buildWithParameters",
