@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+  web:
+    container_name: web
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    restart: always
+    ports:
+      - 3000
+    depends_on:
+      - deployment_server
+      - log_server
+      - reverse_proxy
+
+  deployment_server:
+    container_name: deployment_server
+    build:
+      context: .
+      dockerfile: ./apps/deployment-server/Dockerfile
+    restart: always
+    ports:
+      - 3002
+    depends_on:
+      - reverse_proxy
+
+  log_server:
+    container_name: log_server
+    build:
+      context: .
+      dockerfile: ./apps/log-server/Dockerfile
+    restart: always
+    ports:
+      - 3003
+    depends_on:
+      - reverse_proxy
+
+  reverse_proxy:
+    container_name: reverse_proxy
+    build:
+      context: .
+      dockerfile: ./apps/reverse-proxy/Dockerfile
+    restart: always
+    ports:
+      - 3001
