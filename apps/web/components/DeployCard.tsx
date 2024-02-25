@@ -42,9 +42,7 @@ const DeployCard = () => {
 
     useEffect(() => {
         setEnvFields(prevFields => {
-            if (prevFields.length < envCount) {
-                return [...prevFields, { name: "", value: "" }];
-            } else if (prevFields.length > envCount) {
+            if (prevFields.length > envCount) {
                 return prevFields.slice(0, envCount);
             } else {
                 return prevFields;
@@ -74,7 +72,7 @@ const DeployCard = () => {
                 port: port,
                 project_name: projectName,
                 github_url: github,
-                env: envFields,
+                env: envFields.length === 0 ? null : envFields,
                 src_dir: dir
             },
                 {
