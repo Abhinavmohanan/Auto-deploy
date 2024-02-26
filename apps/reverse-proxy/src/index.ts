@@ -7,25 +7,19 @@ const app = express();
 const port = process.env.PORT || 3000;
 var proxy = httpProxy.createProxyServer();
 
-app.use((req, res) => {
-  const host = req.headers.host;
-  //Split subdomain from host
-  const subdomain = host?.split(".")[0];
-  console.log("Request" + host);
-  //split by - to get the app name
-  const appName = subdomain?.split("-");
-  //get last element of the array
-  const appType = appName?.[appName.length - 1];
+app.use("/:subdomain/:type", (req, res) => {
+  const subdomain = req.params.subdomain;
+  const appType = req.params.type;
   //check if the app type is web
   if (appType === "web") {
     //if it is web, then serve the static files
     return proxy.web(req, res, {
-      target: `https://adwebapps.blob.core.windows.net/${subdomain}`,
+      target: `https://adwebapps.blob.core.windows.net/${subdomain}-${appType}`,
       changeOrigin: true,
     });
   } else if (appType === "server") {
     return proxy.web(req, res, {
-      target: `${subdomain}.centralindia.azurecontainer.io`,
+      target: `http://${subdomain}-${appType}.centralindia.azurecontainer.io`,
       changeOrigin: true,
     });
   }
