@@ -12,7 +12,6 @@ const io = new Server({
 
 io.on("connection", (socket) => {
   socket.on("subscribe", async (channel) => {
-    await redis.connect();
     socket.join(`logs:${channel}`);
     socket.emit("log", `Starting deployment of ${channel}`);
   });
@@ -22,6 +21,9 @@ const initRedis = async () => {
   redis.psubscribe("logs:*");
   redis.on("pmessage", (pattern, channel, message) => {
     io.to(channel).emit("log", message);
+  });
+  redis.on("error", function (err) {
+    console.error("Redis error:", err);
   });
 };
 
