@@ -11,7 +11,7 @@ pipeline {
         
         stage('Build docker image'){
             steps{
-                sh 'cp /home/azureuser/jenkins-nodejs/Dockerfile ./Dockerfile'
+                sh 'wget -O Dockerfile https://raw.githubusercontent.com/Abhinavmohanan/Auto-deploy/main/apps/deployment-server/Dockerfile.nodejs'
                 script{
                      app = docker.build("autodeploy2024/${project_name}","--build-arg SRC_DIR=${src_dir} .")
                 }

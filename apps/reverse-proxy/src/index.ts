@@ -11,7 +11,7 @@ app.use((req, res) => {
   const host = req.headers.host;
   //Split subdomain from host
   const subdomain = host?.split(".")[0];
-
+  console.log("Request" + host);
   //split by - to get the app name
   const appName = subdomain?.split("-");
   //get last element of the array
