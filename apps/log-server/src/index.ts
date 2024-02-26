@@ -11,7 +11,8 @@ const io = new Server({
 });
 
 io.on("connection", (socket) => {
-  socket.on("subscribe", (channel) => {
+  socket.on("subscribe", async (channel) => {
+    await redis.connect();
     socket.join(`logs:${channel}`);
     socket.emit("log", `Starting deployment of ${channel}`);
   });
