@@ -8,7 +8,7 @@ router.post("/", async (req, res) => {
   project_name = project_name.toLowerCase();
 
   await deployToAzure(
-    `${project_name}-web-builder`,
+    project_name,
     `autodeploy2024/web-builder:latest`,
     [
       {

@@ -28,7 +28,7 @@ export const deployToAzure = async (
           location: "centralindia",
           containers: [
             {
-              name: project_name,
+              name: `${project_name}-web-builder`,
               image: image_url,
               resources: {
                 requests: {
@@ -81,7 +81,7 @@ export const deployToAzure = async (
       const logs = await AzureClient.containers.listLogs(
         "auto-deploy-user-deployed-apps",
         `${project_name}-uc`,
-        project_name
+        `${project_name}-web-builder`
       );
       newline = getNewLines(oldString, logs.content ?? "");
       await publishLogs(project_name, newline);
