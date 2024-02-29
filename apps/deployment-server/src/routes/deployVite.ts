@@ -3,9 +3,18 @@ import { deployToAzure } from "../controllers/deploy";
 import { SessionRequest } from "supertokens-node/framework/express";
 let router: Router = Router();
 
+const currentDeployment: string[] = [];
+
 router.post("/", async (req: SessionRequest, res) => {
   let { project_name, github_url, env } = req.body;
   project_name = project_name.toLowerCase();
+
+  if (currentDeployment.includes(project_name)) {
+    res.status(400).json({ message: "Deployment already in progress" });
+    return;
+  }
+
+  currentDeployment.push(project_name);
 
   await deployToAzure(
     project_name,

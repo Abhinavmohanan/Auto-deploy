@@ -35,6 +35,7 @@ const DeployCard = () => {
     const [port, setPort] = React.useState("")
     const [projectNameError, setProjectNameError] = React.useState<string>("");
     const [dir, setDir] = React.useState<string>("")
+    const [deploying, setDeploying] = React.useState(false)
 
     const dispatch = useDispatch();
     const socket = useSelector(selectSocket);
@@ -66,6 +67,7 @@ const DeployCard = () => {
         dispatch(clearLogs())
         console.log("Subscribing to logs");
         dispatch(socketEmit({ event: "subscribe", data: projectName }));
+        setDeploying(true);
 
         if (framework == "Node.js") {
             const response = await axios.post(`${backendUrl}/publishNode`, {
@@ -225,7 +227,7 @@ const DeployCard = () => {
                 </CardContent> : <></>}
             </CardDescription>
             <CardFooter className="flex justify-center">
-                <Button onClick={deploy}>Deploy</Button>
+                <Button onClick={deploy} disabled={deploying}>Deploy</Button>
             </CardFooter>
         </Card>
     )
