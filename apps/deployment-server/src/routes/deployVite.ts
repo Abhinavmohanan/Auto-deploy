@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { deployToAzure } from "../controllers/deploy";
-
+import { SessionRequest } from "supertokens-node/framework/express";
 let router: Router = Router();
 
-router.post("/", async (req, res) => {
+router.post("/", async (req: SessionRequest, res) => {
   let { project_name, github_url, env } = req.body;
   project_name = project_name.toLowerCase();
 

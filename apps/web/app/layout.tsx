@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import Providers from "@/lib/redux/Provider";
+import { SuperTokensProvider } from "@/lib/auth/supertokensProvider";
 
 export const metadata: Metadata = {
   title: "Auto Deploy",
@@ -15,9 +16,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-background font-sans antialiased">
-        <Providers>
-          {children}
-        </Providers>
+        <SuperTokensProvider>
+          <Providers>
+            {children}
+          </Providers>
+        </SuperTokensProvider>
       </body>
     </html>
   );

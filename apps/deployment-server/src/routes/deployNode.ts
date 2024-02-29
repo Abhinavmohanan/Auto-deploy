@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { buildImage } from "../controllers/buildImage";
 import { deployToAzure } from "../controllers/deploy";
-
+import { SessionRequest } from "supertokens-node/framework/express";
 let router: Router = Router();
 
-router.post("/", async (req, res) => {
+router.post("/", async (req: SessionRequest, res) => {
   let { project_name, github_url, env, port, src_dir } = req.body;
   //Build directory
   // let build_dir = req.body.build_dir;
