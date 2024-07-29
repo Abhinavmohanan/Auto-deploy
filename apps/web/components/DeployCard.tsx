@@ -176,7 +176,6 @@ const DeployCard = () => {
                         setEnv(check.valueOf().toString() == "true" ? true : false)
                         if (envCount == 0) setEnvCount(1)
                     }
-
                     }></Checkbox>
                 </CardContent>
                 {env ?

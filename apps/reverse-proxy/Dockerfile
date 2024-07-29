@@ -9,7 +9,7 @@ RUN apk add --no-cache libc6-compat
 RUN apk update
 # Set working directory
 WORKDIR /app
-RUN npm -g add turbo
+RUN npm -g add turbo@1.12.4
 COPY . .
 RUN turbo prune reverse-proxy --docker
 

@@ -51,7 +51,7 @@ export default function Page(): JSX.Element {
 
       }}
       accessDeniedScreen={AccessDeniedScreen} overrideGlobalClaimValidators={(globalValidators) => [
-        ...globalValidators, UserRoleClaim.validators.includes("test_user"), PermissionClaim.validators.includes("access"),]}>
+        ...globalValidators,/* UserRoleClaim.validators.includes("test_user"), PermissionClaim.validators.includes("access"),*/]}>
       <>          <Navbar />
         <main className={cn("justify-center items-center p-5 flex flex-col", fontSans.className)}>
           <div className="font-sans space-y-5 w-2/5">

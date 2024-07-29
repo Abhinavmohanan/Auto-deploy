@@ -31,8 +31,8 @@ app.use(
     checkDatabase: true,
     overrideGlobalClaimValidators: async (globalValidators) => [
       ...globalValidators,
-      UserRoles.UserRoleClaim.validators.includes("test_user"),
-      UserRoles.PermissionClaim.validators.includes("access"),
+      // UserRoles.UserRoleClaim.validators.includes("test_user"),
+      // UserRoles.PermissionClaim.validators.includes("access"),
     ],
   }),
   deployNodeRoute
@@ -44,8 +44,8 @@ app.use(
     checkDatabase: true,
     overrideGlobalClaimValidators: async (globalValidators) => [
       ...globalValidators,
-      UserRoles.UserRoleClaim.validators.includes("test_user"),
-      UserRoles.PermissionClaim.validators.includes("access"),
+      // UserRoles.UserRoleClaim.validators.includes("test_user"),
+      // UserRoles.PermissionClaim.validators.includes("access"),
     ],
   }),
   deployViteRoute
